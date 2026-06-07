@@ -1,0 +1,21 @@
+[2026-06-07T04:57:40.444+0000] {local_task_job_runner.py:120} INFO - ::group::Pre task execution logs
+[2026-06-07T04:57:40.589+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: etl_cotacoes_moedas.load_task manual__2026-06-07T04:37:51.364952+00:00 [queued]>
+[2026-06-07T04:57:40.616+0000] {taskinstance.py:2076} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: etl_cotacoes_moedas.load_task manual__2026-06-07T04:37:51.364952+00:00 [queued]>
+[2026-06-07T04:57:40.620+0000] {taskinstance.py:2306} INFO - Starting attempt 1 of 4
+[2026-06-07T04:57:40.644+0000] {taskinstance.py:2330} INFO - Executing <Task(PythonOperator): load_task> on 2026-06-07 04:37:51.364952+00:00
+[2026-06-07T04:57:40.649+0000] {standard_task_runner.py:63} INFO - Started process 209 to run task
+[2026-06-07T04:57:40.655+0000] {standard_task_runner.py:90} INFO - Running: ['***', 'tasks', 'run', 'etl_cotacoes_moedas', 'load_task', 'manual__2026-06-07T04:37:51.364952+00:00', '--job-id', '21', '--raw', '--subdir', 'DAGS_FOLDER/cotacoes_dags.py', '--cfg-path', '/tmp/tmp1tm_tzab']
+[2026-06-07T04:57:40.659+0000] {standard_task_runner.py:91} INFO - Job 21: Subtask load_task
+[2026-06-07T04:57:40.825+0000] {task_command.py:426} INFO - Running <TaskInstance: etl_cotacoes_moedas.load_task manual__2026-06-07T04:37:51.364952+00:00 [running]> on host aeec86894c9a
+[2026-06-07T04:57:41.059+0000] {taskinstance.py:2648} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='etl_team' AIRFLOW_CTX_DAG_ID='etl_cotacoes_moedas' AIRFLOW_CTX_TASK_ID='load_task' AIRFLOW_CTX_EXECUTION_DATE='2026-06-07T04:37:51.364952+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2026-06-07T04:37:51.364952+00:00'
+[2026-06-07T04:57:41.061+0000] {taskinstance.py:430} INFO - ::endgroup::
+[2026-06-07T04:57:42.227+0000] {cotacoes_dags.py:101} INFO - === TASK: LOAD ===
+[2026-06-07T04:57:42.260+0000] {load.py:56} INFO - Conectando ao PostgreSQL | host: postgres-data
+[2026-06-07T04:57:42.303+0000] {load.py:81} INFO - Carga concluída | 3 registro(s) inserido(s) na tabela 'cotacoes'.
+[2026-06-07T04:57:42.307+0000] {cotacoes_dags.py:117} INFO - === PIPELINE CONCLUÍDO | 3 registro(s) inserido(s) ===
+[2026-06-07T04:57:42.309+0000] {python.py:237} INFO - Done. Returned value was: 3
+[2026-06-07T04:57:42.313+0000] {taskinstance.py:441} INFO - ::group::Post task execution logs
+[2026-06-07T04:57:42.411+0000] {taskinstance.py:1206} INFO - Marking task as SUCCESS. dag_id=etl_cotacoes_moedas, task_id=load_task, run_id=manual__2026-06-07T04:37:51.364952+00:00, execution_date=20260607T043751, start_date=20260607T045740, end_date=20260607T045742
+[2026-06-07T04:57:42.480+0000] {local_task_job_runner.py:240} INFO - Task exited with return code 0
+[2026-06-07T04:57:42.555+0000] {taskinstance.py:3498} INFO - 1 downstream tasks scheduled from follow-on schedule check
+[2026-06-07T04:57:42.575+0000] {local_task_job_runner.py:222} INFO - ::endgroup::

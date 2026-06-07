@@ -1,0 +1,125 @@
+version: '3.8'
+
+x-airflow-common: &airflow-common
+  build: .
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+    # Conexão com o PostgreSQL de dados (onde o ETL vai carregar)
+    POSTGRES_DATA_HOST: postgres-data
+    POSTGRES_DATA_PORT: 5432
+    POSTGRES_DATA_DB: cotacoes_db
+    POSTGRES_DATA_USER: etl_user
+    POSTGRES_DATA_PASSWORD: etl_password
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./scripts:/opt/airflow/scripts
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+  depends_on:
+    postgres-airflow:
+      condition: service_healthy
+
+services:
+
+  # -------------------------------------------------------------------
+  # PostgreSQL interno do Airflow (metadados, logs de execução, etc.)
+  # -------------------------------------------------------------------
+  postgres-airflow:
+    image: postgres:15
+    container_name: postgres-airflow
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+    volumes:
+      - postgres_airflow_data:/var/lib/postgresql/data
+
+  # -------------------------------------------------------------------
+  # PostgreSQL de dados — onde o pipeline vai carregar as cotações
+  # -------------------------------------------------------------------
+  postgres-data:
+    image: postgres:15
+    container_name: postgres-data
+    environment:
+      POSTGRES_USER: etl_user
+      POSTGRES_PASSWORD: etl_password
+      POSTGRES_DB: cotacoes_db
+    ports:
+      - "5433:5432"   # exposto na porta 5433 para não conflitar com Postgres local
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "etl_user", "-d", "cotacoes_db"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    restart: always
+    volumes:
+      - postgres_data_volume:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql  # cria a tabela ao iniciar
+
+  # -------------------------------------------------------------------
+  # Airflow — inicialização (roda uma vez e encerra)
+  # -------------------------------------------------------------------
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com \
+          --password admin
+    restart: on-failure
+
+  # -------------------------------------------------------------------
+  # Airflow Scheduler — orquestra e dispara as DAGs
+  # -------------------------------------------------------------------
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command: scheduler
+    restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # -------------------------------------------------------------------
+  # Airflow Webserver — interface web na porta 8080
+  # -------------------------------------------------------------------
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_airflow_data:
+  postgres_data_volume:
