@@ -90,7 +90,7 @@ etl-cotacoes/
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/etl-cotacoes.git
+git clone https://github.com/Arthurss123/etl-cotacoes.git
 cd etl-cotacoes
 ```
 
@@ -250,4 +250,4 @@ docker compose up --build -d
 
 ## 👤 Autor
 
-Feito por **Arthur** — [LinkedIn](https://linkedin.com/in/seu-perfil) · [GitHub](https://github.com/seu-usuario)
+Feito por **Arthur** — [LinkedIn](https://www.linkedin.com/in/arthurmoura233/) · [GitHub](https://github.com/Arthurss123)
